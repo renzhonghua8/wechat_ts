@@ -1,0 +1,30 @@
+name: rzh_ts
+
+on:
+  workflow_dispatch:
+  schedule:
+  
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '30 5,17 * * *'
+jobs:
+#将工作流程中运行的所有作业组合在一起
+  build:
+  #定义名为 build 的作业。 子键将定义作业的属性 
+    runs-on: ubuntu-latest 
+    steps:
+      - uses: actions/checkout@v2
+    
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9.1
+      - name: Set timezone
+        run: |
+          cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+      - name: install pip packages
+        run: |
+          python -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+      - name: rzh_ts
+        run: |
+          python3 main.py
