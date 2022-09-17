@@ -1,4 +1,4 @@
-name: rzh_ts
+name: wechat_ts
 
 on:
   workflow_dispatch:
