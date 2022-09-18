@@ -75,6 +75,35 @@ def tip():
         return pop,tips
     else:
         return "",""
+# 早安心语
+def gm():
+    if (tianqi_API!="否"):
+        conn = http.client.HTTPSConnection('api.tianapi.com')  # 接口域名
+        params = urllib.parse.urlencode({'key': '958c64cb1c216f910a6126540c25a015'})
+        headers = {'Content-type': 'application/x-www-form-urlencoded'}
+        conn.request('POST', '/zaoan/index', params, headers)
+        res = conn.getresponse()
+        data = res.read()
+        data = json.loads(data)  # 转换成字典
+        gm = data["newslist"][0]["content"]
+        return gm
+    else:
+        return ""
+# 笑话
+def joke():
+    if (tianqi_API != "否"):
+        conn = http.client.HTTPSConnection('api.tianapi.com')  # 接口域名
+        params = urllib.parse.urlencode({'key': '958c64cb1c216f910a6126540c25a015', 'num': '1'})
+        headers = {'Content-type': 'application/x-www-form-urlencoded'}
+        conn.request('POST', '/joke/index', params, headers)
+        res = conn.getresponse()
+        data = res.read()
+        data = json.loads(data)  # 转换成字典
+        joke_title = data["newslist"][0]["title"]
+        joke_content = data["newslist"][0]["content"]
+        return joke_title,joke_content
+    else:
+        return "",""
 def it_index():
     if (it_index_API != "否"):
         conn = http.client.HTTPSConnection('api.tianapi.com')  #接口域名
@@ -85,13 +114,13 @@ def it_index():
         data = res.read()
         data = json.loads(data) # 转换成字典
         description = data["newslist"][0]["description"]
-        source = data["newslist"][0]["source"]
-        return description,source
+
+        return description
     else:
-        return "", ""
+        return ""
 
 #推送信息
-def send_message(to_user, access_token, city_name, weather, max_temperature, min_temperature,pop,tips,description,source):
+def send_message(to_user, access_token, city_name, weather, max_temperature, min_temperature,pop,tips,gm,joke_title,joke_content,description):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
     year = localtime().tm_year
@@ -130,18 +159,24 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
                 "value": pop,
                 "color": get_color()
             },
-
             "tips": {
                 "value": tips,
                 "color": get_color()
             },
-            "description": {
-                "value": description,
+            "gm": {
+                "value": gm,
                 "color": get_color()
             },
-
-            "source": {
-                "value": source,
+            "joke_title": {
+                "value": joke_title,
+                "color": get_color()
+            },
+            "joke_content": {
+                "value": joke_content,
+                "color": get_color()
+            },
+            "description": {
+                "value": description,
                 "color": get_color()
             }
             }
@@ -185,16 +220,24 @@ if __name__ == '__main__':
     # 传入省份和市获取天气信息
     province, city = config["province"], config["city"]
     weather, max_temperature, min_temperature = get_weather(province, city)
+    # 获取早安心语API
+    gm_API = config["gm_API"]
+    # 获取joke API
+    joke_API = config["joke_API"]
     # 获取天气预报API
     tianqi_API = config["tianqi_API"]
     # 获取it资讯API
     it_index_API = config["it_index_API"]
     # 下雨概率和建议
     pop, tips = tip()
+    # 早安心语
+    gm = gm()
+    # joke
+    joke_title,joke_content = joke()
     # it_index it资讯
-    description,source = it_index()
+    description = it_index()
     for user in users:
-        send_message(user, accessToken, city, weather, max_temperature, min_temperature,pop,tips,description,source)
+        send_message(user, accessToken, city, weather, max_temperature, min_temperature,pop,tips,gm,joke_title,joke_content,description)
     import time
     time_duration = 3.5
     time.sleep(time_duration)
